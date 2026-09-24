@@ -159,3 +159,22 @@ No se pide y **no suma**:
 1. Subir hoy mismo `main.py` con el "hola mundo" de FastAPI y `requirements.txt`. Aunque sea mínimo, el repo tiene que mostrar avance.
 2. `seed.py` con las 3 tablas: `productos`, `pedidos`, `items_pedido`.
 3. Las dos tienen que commitear: los commits muestran el aporte de cada una.
+
+## 24/09
+
+**Lo que hay:** por fin el repo tiene código. `main.py` con el "hola mundo" de FastAPI, `requirements.txt`, y `seed.py` que crea `productos`, `pedidos` e `items_pedido` con las columnas del alcance. Commits de las dos. 👍
+
+**A corregir en `seed.py`**
+- **Pasen la base a SQLAlchemy** (ver [guias/sqlalchemy_orm.md](guias/sqlalchemy_orm.md)): las tablas como clases, `create_all` y `add_all`. El `sqlite3` con SQL a mano ya no va.
+- Faltan las claves foráneas: `items_pedido.pedido_id` y `items_pedido.producto_id` tienen que ser `ForeignKey`.
+- Si lo corren dos veces rompe (`CREATE TABLE` sin `IF NOT EXISTS`) y no controla si ya hay datos. Tiene que cargar **solo si la base está vacía** (sección 9 de la guía). En Render el seed corre en cada arranque.
+- Faltan datos: hay 3 productos, 1 pedido y 2 items. Se piden unos **10 por tabla**, si no los endpoints de filtro y resumen no tienen con qué probarse.
+
+**A corregir en el repo**
+- `tienda.db` está subido. Agréguenlo al `.gitignore` y sáquenlo con `git rm --cached tienda.db`. Se genera solo con el seed.
+- `requirements.txt`: agreguen `uvicorn-worker`, `gunicorn` y `sqlalchemy`.
+
+**Próximos pasos**
+1. `seed.py` con SQLAlchemy, FK y ~10 registros por tabla.
+2. `GET /productos?categoria=` y `GET /productos/{id}` con 404.
+3. La clave con `FastAPI(dependencies=[Depends(verificar)])` (el código está arriba en este archivo).
