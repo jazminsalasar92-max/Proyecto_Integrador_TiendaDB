@@ -18,9 +18,14 @@ Esto es lo que hay que entregar. Lo que no está acá, no se pide.
 
 ### Stack
 - Python + **FastAPI** + Uvicorn.
-- Datos en **SQLite** (con `sqlite3`, como en la Clase 16; SQLAlchemy es opcional).
+- Datos en **SQLite** usando **SQLAlchemy** (ORM): las tablas se definen como clases de Python y las consultas se hacen con métodos, sin escribir SQL a mano. **No se usa Pydantic**: las validaciones se hacen a mano en Python. Guía con ejemplo completo: [guias/sqlalchemy_orm.md](guias/sqlalchemy_orm.md).
 - Repositorio en GitHub con commits de **todos** los integrantes.
 - API desplegada **en producción con Gunicorn** en Render, con URL pública y `/docs` funcionando (ver abajo).
+
+### Nombres en el código (criterio acordado con la cátedra de Inglés)
+- **Variables, funciones y clases en inglés**: `list_students`, `get_session`, `class Student(Base)`.
+- **Tablas, columnas, rutas y query params** quedan **como figuran en el alcance** (en español): son el contrato de la API. Ejemplo: `class Student(Base)` con `__tablename__ = "estudiantes"` y columna `anio_cursada`.
+- **Comentarios**: pueden estar en español mientras desarrollan, pero para la **entrega final** tienen que estar en inglés.
 
 ### Despliegue a producción (Render + Gunicorn)
 
@@ -34,6 +39,7 @@ fastapi
 uvicorn
 uvicorn-worker
 gunicorn
+sqlalchemy
 ```
 
 En Render → **New → Web Service** → conectás el repo, y configurás:
@@ -52,7 +58,7 @@ La clave viaja en el código, así que no hay que configurar nada más en Render
 - **3 tablas**, cada una con clave primaria (`id`).
 - Al menos **1 relación** entre tablas (clave foránea, ej. `equipo_id`).
 - Unos **10 registros de ejemplo** por tabla. Siempre **datos ficticios**.
-- Un script de carga inicial `seed.py` que crea las tablas y carga los datos **si la base está vacía**. Se ejecuta antes de levantar el servidor. En Render el disco se borra al reiniciar: así la API siempre arranca con datos.
+- Un script de carga inicial `seed.py` que crea las tablas (`create_all`) y carga los datos **si la base está vacía** (ver sección 9 de la guía). Se ejecuta antes de levantar el servidor. En Render el disco se borra al reiniciar: así la API siempre arranca con datos.
 - El archivo `.db` **no se sube** a GitHub (agregalo al `.gitignore`); se genera solo.
 
 ### Seguridad: TODOS los endpoints van protegidos
@@ -87,12 +93,12 @@ Cada grupo implementa **exactamente estos 6 endpoints**, adaptados a su tema (ve
 
 | # | Tipo | Ejemplo genérico | Qué practica |
 |---|---|---|---|
-| 1 | Listado con filtro | `GET /cosas?campo=valor` | Query param, `SELECT ... WHERE` |
+| 1 | Listado con filtro | `GET /cosas?campo=valor` | Query param, `select(...).where(...)` |
 | 2 | Detalle | `GET /cosas/{id}` | Path param, **404** si no existe |
-| 3 | Relación | `GET /cosas/{id}/otras` | Cruzar dos tablas por la clave foránea |
+| 3 | Relación | `GET /cosas/{id}/otras` | Cruzar dos tablas por la clave foránea (`relationship` o filtro por FK) |
 | 4 | Segundo listado con filtro | `GET /otras?campo=valor` | Query param sobre otra tabla |
-| 5 | Calculado | `GET /resumen` | Contar, sumar o agrupar (en Python o SQL) |
-| 6 | Alta | `POST /cosas` | Insertar en la base, con modelo **Pydantic** |
+| 5 | Calculado | `GET /resumen` | Contar, sumar o agrupar (en Python o con `func` de SQLAlchemy) |
+| 6 | Alta | `POST /cosas` | Recibir el cuerpo como `dict`, **validar a mano** (400 si está mal) e insertar con la sesión |
 
 Además, en Nivel A:
 - **Errores:** 401 (sin clave), 404 (no existe), y la API no se cae si la base no está o falla una consulta (`try/except`).
@@ -150,9 +156,32 @@ No se pide y **no suma**:
 
 ## 23/09
 
+**📌 Novedad:** la base se maneja con **SQLAlchemy** (ORM) y **sin Pydantic**; las validaciones del `POST` van a mano. Hay una guía con ejemplo completo en [guias/sqlalchemy_orm.md](guias/sqlalchemy_orm.md) y el código en `guias/pokedex/`. Agreguen `sqlalchemy` a `requirements.txt`.
+
 **Lo que hay:** nada. ⚠️ El repositorio está **vacío, sin un solo commit**.
 
 **Próximos pasos (urgente)**
 1. Subir hoy mismo `main.py` con el "hola mundo" de FastAPI y `requirements.txt`. Aunque sea mínimo, el repo tiene que mostrar avance.
 2. `seed.py` con las 3 tablas: `productos`, `pedidos`, `items_pedido`.
 3. Las dos tienen que commitear: los commits muestran el aporte de cada una.
+
+## 24/09
+
+**📌 Criterio de nombres.** Variables, funciones y clases en **inglés**; tablas, columnas y rutas como en el alcance; comentarios en inglés para la entrega final. Está detallado arriba en *Reglas comunes* y la guía ya lo aplica.
+
+**Lo que hay:** por fin el repo tiene código. `main.py` con el "hola mundo" de FastAPI, `requirements.txt`, y `seed.py` que crea `productos`, `pedidos` e `items_pedido` con las columnas del alcance. Commits de las dos. 👍
+
+**A corregir en `seed.py`**
+- **Pasen la base a SQLAlchemy** (ver [guias/sqlalchemy_orm.md](guias/sqlalchemy_orm.md)): las tablas como clases, `create_all` y `add_all`. El `sqlite3` con SQL a mano ya no va.
+- Faltan las claves foráneas: `items_pedido.pedido_id` y `items_pedido.producto_id` tienen que ser `ForeignKey`.
+- Si lo corren dos veces rompe (`CREATE TABLE` sin `IF NOT EXISTS`) y no controla si ya hay datos. Tiene que cargar **solo si la base está vacía** (sección 9 de la guía). En Render el seed corre en cada arranque.
+- Faltan datos: hay 3 productos, 1 pedido y 2 items. Se piden unos **10 por tabla**, si no los endpoints de filtro y resumen no tienen con qué probarse.
+
+**A corregir en el repo**
+- `tienda.db` está subido. Agréguenlo al `.gitignore` y sáquenlo con `git rm --cached tienda.db`. Se genera solo con el seed.
+- `requirements.txt`: agreguen `uvicorn-worker`, `gunicorn` y `sqlalchemy`.
+
+**Próximos pasos**
+1. `seed.py` con SQLAlchemy, FK y ~10 registros por tabla.
+2. `GET /productos?categoria=` y `GET /productos/{id}` con 404.
+3. La clave con `FastAPI(dependencies=[Depends(verificar)])` (el código está arriba en este archivo).
