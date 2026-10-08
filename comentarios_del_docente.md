@@ -190,3 +190,42 @@ No se pide y **no suma**:
 1. `seed.py` con SQLAlchemy, FK y ~10 registros por tabla.
 2. `GET /productos?categoria=` y `GET /productos/{id}` con 404.
 3. La clave con `FastAPI(dependencies=[Depends(verificar)])` (el código está arriba en este archivo).
+
+## 08/10
+
+**📌 Cambio de criterio: todo en inglés.** Ahora también las **tablas, columnas, rutas y query params** van en inglés, igual que el README, los docstrings y los mensajes de la API. Reemplaza lo dicho el 24/09; está detallado arriba en *Nombres en el código*. El alcance sigue listando los nombres en español solo como referencia.
+
+**📌 Guía nueva (opcional):** [guias/variables_de_entorno.md](guias/variables_de_entorno.md), para sacar la clave del código con un `.env`.
+
+**Lo que hay:** `db.py` con las tres tablas como clases de SQLAlchemy, con las claves foráneas y la `relationship` de `OrderItem` a `Product`. 👍 Lo probé y crea las tres tablas bien. `tienda.db` ya no está en el repo, el `.gitignore` está correcto y `requirements.txt` también.
+
+**⚠️ Están atrasadas.** `main.py` sigue siendo el "Hola, Mundo" del 24/09: **0 de 6 endpoints** y sin API key. El último commit es del 03/10. Otros grupos ya tienen los seis endpoints andando.
+
+**⚠️ Desde el 24/09 solo hay commits de Jazmín.** Kiara: tus commits tienen que aparecer. Es un requisito del proyecto y es lo que muestra el aporte de cada una.
+
+**A corregir en `seed.py`**
+- Sigue siendo el del 24/09, con `sqlite3` y SQL a mano, y ya no es compatible con `db.py`. Si las tablas ya existen se cae con `table productos already exists` (lo probé).
+- Hay que reescribirlo usando `db.py`: importa las clases, llama a `create_tables()`, y carga los datos con `s.add_all([...])` **solo si la tabla está vacía**. Es la sección 9 de la [guía](guias/sqlalchemy_orm.md).
+- Siguen siendo 3 productos, 1 pedido y 2 items. Se piden unos **10 por tabla**.
+
+**Nombres en inglés** (criterio nuevo)
+Las clases ya están bien (`Product`, `Order`, `OrderItem`). Faltan tablas, columnas y rutas:
+
+| Hoy / alcance | Tiene que ser |
+|---|---|
+| tablas `productos`, `pedidos`, `items_pedido` | `products`, `orders`, `order_items` |
+| `nombre`, `categoria`, `precio`, `stock` | `name`, `category`, `price`, `stock` |
+| `fecha`, `total` | `date`, `total` |
+| `pedido_id`, `producto_id`, `cantidad` | `order_id`, `product_id`, `quantity` |
+| `GET /productos?categoria=` · `GET /productos/{id}` · `POST /productos` | `GET /products?category=` · `GET /products/{id}` · `POST /products` |
+| `GET /pedidos/{id}/items` · `GET /pedidos?fecha=` | `GET /orders/{id}/items` · `GET /orders?date=` |
+| `GET /ventas/resumen` | `GET /sales/summary` |
+
+Háganlo ahora, que todavía no hay endpoints escritos: después es el doble de trabajo.
+
+**Próximos pasos**
+1. Renombrar tablas y columnas en `db.py`.
+2. Reescribir `seed.py` con SQLAlchemy y ~10 registros por tabla. Probar que corre dos veces sin romper ni duplicar.
+3. Agregar la API key en `main.py` (el código está arriba en *Seguridad*) y probar el 401.
+4. `GET /products?category=` y `GET /products/{id}` con 404.
+5. Repártanse el resto: una hace los dos de pedidos (3 y 4), la otra el resumen y el `POST` (5 y 6).
