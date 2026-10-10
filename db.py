@@ -17,44 +17,46 @@ class Base(DeclarativeBase):
 
     
 class Product(Base):
-    __tablename__ = "productos"
+    __tablename__ = "products"
 
     id: Mapped[int] = mapped_column(primary_key=True)
-    nombre: Mapped[str] = mapped_column(String(50))
-    categoria: Mapped[str]
-    precio: Mapped[float]
+    name: Mapped[str] = mapped_column(String(50))
+    category: Mapped[str]
+    price: Mapped[float]
     stock: Mapped[int]
     
     
     def to_dict(self) -> dict:
-        return {"id": self.id, "nombre": self.nombre, "categoria": self.categoria, "precio": self.precio, "stock": self.stock}
+        return {"id": self.id, "name": self.name, "category": self.category, "price": self.price, "stock": self.stock}
 
 
 class Order(Base):
-    __tablename__ = "pedidos"
+    __tablename__ = "orders"
 
     id: Mapped[int] = mapped_column(primary_key=True)
-    fecha: Mapped[str] = mapped_column(String(50))
+    date: Mapped[str] = mapped_column(String(50))
     total: Mapped[float]
     
 
     def to_dict(self) -> dict:
-        return {"id": self.id, "fecha": self.fecha, "total": self.total}
+        return {"id": self.id, "date": self.date, "total": self.total}
+    
+    
 
 class OrderItem(Base):
-    __tablename__ = "items_pedido"
+    __tablename__ = "order_Items"
 
     id: Mapped[int] = mapped_column(primary_key=True)
-    pedido_id: Mapped[int] = mapped_column(ForeignKey("pedidos.id"))
-    producto_id: Mapped[int] = mapped_column(ForeignKey("productos.id"))
-    cantidad: Mapped[int] 
+    order_id: Mapped[int] = mapped_column(ForeignKey("orders.id"))
+    product_id: Mapped[int] = mapped_column(ForeignKey("products.id"))
+    quantity: Mapped[int] 
     
    
     product: Mapped[Product] = relationship() #not a column
    
     
     def to_dict(self) -> dict:
-        return {"id": self.id, "pedido_id": self.pedido_id, "producto_id": self.producto_id, "cantidad": self.cantidad}
+        return {"id": self.id, "order_id": self.order_id, "product_id": self.product_id, "quantity": self.quantity}
 
 
 
