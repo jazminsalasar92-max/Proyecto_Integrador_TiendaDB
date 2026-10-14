@@ -49,14 +49,24 @@ def get_sales_summary(db: Session):
         "total_revenue": total_revenue
     }
 
-def create_product_dict(db: Session, product_data: dict):
-    db_product = models.Product(
-        name=product_data.get("name"),
-        category=product_data.get("category"),
-        price=product_data.get("price"),
-        stock=product_data.get("stock")
-    )
-    db.add(db_product)
-    db.commit()
-    db.refresh(db_product)
-    return db_product
+SECRET_API_KEY = "MESSI"
+
+def verify_api_key(api_key: str = Header(...)):
+    if api_key != SECRET_API_KEY:
+        raise HTTPException(
+            status_code=status.HTTP_401_UNAUTHORIZED,
+            detail="Invalid or missing API Key"
+        )
+    return api_key
+
+@app.get("/sales/summary")
+def get_sales_summary(db: Session = Depends(database.get_db)):
+    return crud.get_sales_summary(db)
+
+@app.post("/products", status_code=status.HTTP_201_CREATED)
+def create_product(
+    product_data: dict, 
+    db: Session = Depends(database.get_db), 
+    api_key: str = Depends(verify_api_key)
+):
+    return crud.create_product_dict(db, product_data)
