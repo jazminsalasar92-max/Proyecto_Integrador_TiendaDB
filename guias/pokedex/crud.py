@@ -1,6 +1,6 @@
 from sqlalchemy import select
 
-from db import get_session, PokemonType, Pokemon
+from models import get_session, PokemonType, Pokemon
 from validation import validate_type, validate_pokemon
 
 

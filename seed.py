@@ -1,6 +1,6 @@
 from sqlalchemy import select
 
-from db import create_tables, get_session, Product, Order, OrderItem
+from models import create_tables, get_session, Product, Order, OrderItem
 
 create_tables()
 

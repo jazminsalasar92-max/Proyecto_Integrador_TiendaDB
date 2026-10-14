@@ -3,7 +3,7 @@ from sqlalchemy.orm import DeclarativeBase, Mapped, mapped_column, relationship,
 
 DB_FILE = "tienda.db"
 
-# El "engine" es la conexión a la base. sqlite:/// + nombre del archivo.
+
 engine = create_engine(f"sqlite:///{DB_FILE}")
 
 
