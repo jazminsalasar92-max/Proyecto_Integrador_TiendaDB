@@ -29,9 +29,6 @@ def get_orders_by_date(db: Session, order_date: str):
     Busca en la tabla orders todas las órdenes que coincidan con la fecha.
     """
     return db.query(models.Order).filter(models.Order.date == order_date).all()
-from fastapi import Depends, HTTPException, status, Header
-from sqlalchemy.orm import Session
-import crud, database
 
 API_KEY_SECRETA = "MESSI"
 
