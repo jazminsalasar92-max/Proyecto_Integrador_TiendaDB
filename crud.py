@@ -16,8 +16,6 @@ def get_product(product_id: int) -> dict | None:
     with get_session() as s:
         product =s.get(Product, product_id)
         return product.to_dict() if product else None
-    from sqlalchemy.orm import Session
-from datetime import date
 import models
 
 def get_order_items(db: Session, order_id: int):
