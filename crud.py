@@ -29,7 +29,6 @@ def get_orders_by_date(db: Session, order_date: str):
     Busca en la tabla orders todas las órdenes que coincidan con la fecha.
     """
     return db.query(models.Order).filter(models.Order.date == order_date).all()
-
 API_KEY_SECRETA = "MESSI"
 
 def verificar_api_key(api_key: str = Header(...)):
@@ -40,12 +39,10 @@ def verificar_api_key(api_key: str = Header(...)):
         )
     return api_key
 
-# Punto 5: GET /sales/summary
 @app.get("/sales/summary")
 def sales_summary(db: Session = Depends(database.get_db)):
     return crud.get_sales_summary(db)
 
-# Punto 6: POST /products (Sin validación, recibe un diccionario genérico)
 @app.post("/products", status_code=status.HTTP_201_CREATED)
 def add_product(
     product_data: dict, 
