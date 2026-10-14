@@ -25,9 +25,6 @@ def get_product(product_id:int):
            raise HTTPException(status_code=404,
            detail="No encontrado")
     return product
-from fastapi import Depends, HTTPException, status
-from sqlalchemy.orm import Session
-import crud, database  # O como hayas importado tu archivo de conexión a la base
 
 @app.get("/orders/{id}/items")
 def read_order_items(id: int, db: Session = Depends(database.get_db)):
