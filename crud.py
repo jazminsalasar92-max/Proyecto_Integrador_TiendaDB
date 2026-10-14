@@ -1,4 +1,5 @@
 from sqlalchemy import select
+from sqlalchemy.orm import Session
 
 from models import get_session, Product
 #cuando realize validation.py agrego from validation
@@ -15,4 +16,22 @@ def get_product(product_id: int) -> dict | None:
     with get_session() as s:
         product =s.get(Product, product_id)
         return product.to_dict() if product else None
+    from sqlalchemy.orm import Session
+from datetime import date
+import models
+
+def get_order_items(db: Session, order_id: int):
+    """
+    Busca en la tabla order_items todos los registros que coincidan con el order_id recibido.
+    """
+    return db.query(models.OrderItem).filter(models.OrderItem.order_id == order_id).all()
+
+def get_orders_by_date(db: Session, order_date: str):
+    """
+    Busca en la tabla orders todas las órdenes que coincidan con la fecha.
+    """
+    return db.query(models.Order).filter(models.Order.date == order_date).all()
+
+
+
     

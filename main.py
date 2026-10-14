@@ -25,3 +25,21 @@ def get_product(product_id:int):
            raise HTTPException(status_code=404,
            detail="No encontrado")
     return product
+from fastapi import Depends, HTTPException, status
+from sqlalchemy.orm import Session
+import crud, database  # O como hayas importado tu archivo de conexión a la base
+
+@app.get("/orders/{id}/items")
+def read_order_items(id: int, db: Session = Depends(database.get_db)):
+    items = crud.get_order_items(db, order_id=id)
+    if not items:
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND, 
+            detail=f"No se encontraron ítems para la orden con ID {id}"
+        )
+    return items
+
+@app.get("/orders")
+def read_orders_by_date(date: str, db: Session = Depends(database.get_db)):
+    orders = crud.get_orders_by_date(db, order_date=date)
+    return orders
