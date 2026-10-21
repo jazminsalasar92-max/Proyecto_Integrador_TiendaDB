@@ -57,12 +57,10 @@ def get_sales_summary() -> dict:
         }
         
 
-def create_product(data: dict) -> dict:
+def create_product(data: dict) -> dict: 
     clean = validate_product(data)
     with get_session() as s:
         product = Product(**clean)
         s.add(product)
         s.commit()
         return product.to_dict()
-    
-           
