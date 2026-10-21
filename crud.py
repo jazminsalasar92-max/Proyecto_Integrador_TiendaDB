@@ -63,4 +63,4 @@ def create_product(data: dict) -> dict:
         product = Product(**clean)
         s.add(product)
         s.commit()
-        return product.to_dict()
+        return product.to_dict()     
