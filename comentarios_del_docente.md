@@ -333,3 +333,17 @@ Con eso: 401 sin clave, filtro de fecha opcional, 404 en un pedido que no existe
 **Commits.** Desde el 15/10 solo hay commits de Jazmín. Si trabajan juntas, aclárenlo en el mensaje (*pair coding*). La nota es grupal y en la defensa les vamos a preguntar a las dos.
 
 **Para la defensa (28/10):** con `main.py` reescrito y el README tienen el Nivel A. Prueben la demo completa en la notebook con la que van a presentar.
+
+**Actualización (21/10, noche):** Jazmín reescribió `main.py` contra el `crud.py` nuevo, y la estructura quedó bien. 👍 Pero **la API sigue sin arrancar por dos palabras**:
+1. `main.py`, línea 5: importa `verify_api_key`, y en `security.py` la función se llama `verify_api_Key` (con K mayúscula). Usen el mismo nombre en los dos archivos.
+2. `main.py`, línea 7: sigue diciendo `depencies=`. Es `dependencies=`.
+
+Probé con esos dos cambios y **funcionan los 6 endpoints**:
+- productos con filtro y con 404;
+- items del pedido con 404;
+- pedidos con fecha opcional;
+- el resumen con los más vendidos;
+- el `POST`, con 201 si los datos están bien y 400 si están mal (precio negativo, `true` o cuerpo vacío);
+- 401 sin clave.
+
+Con esas dos palabras corregidas tienen el Nivel A. **Falta además el README**, que se evalúa en la defensa.
