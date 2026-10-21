@@ -1,17 +1,12 @@
-from dbm import _Database
-from email.header import Header
-from http.client import HTTPException
-import pstats
+from sqlalchemy import select, func
 
-from sqlalchemy import select
-from sqlalchemy.orm import Session
+from models import get_session, Product, Order, OrderItem
+from validation import validate_product
 
-from models import get_session, Product
-#cuando realize validation.py agrego from validation
 
 def list_products (category:str | None = None) -> list[dict]:
     with get_session() as s:
-        query = select(Product)
+        query = select(Product).order_by(Product.id)
         if category is not None:
             query = query.where(Product.category == category)
         return [p.to_dict() for p in s.scalars(query)]
@@ -21,36 +16,53 @@ def get_product(product_id: int) -> dict | None:
     with get_session() as s:
         product =s.get(Product, product_id)
         return product.to_dict() if product else None
-import models
-
-def get_order_items(db: Session, order_id: int):
-    """
-    Busca en la tabla order_items todos los registros que coincidan con el order_id recibido.
-    """
-    return db.query(models.OrderItem).filter(models.OrderItem.order_id == order_id).all()
-
-def get_orders_by_date(db: Session, order_date: str):
-    """
-    Busca en la tabla orders todas las órdenes que coincidan con la fecha.
-    """
-    return db.query(models.Order).filter(models.Order.date == order_date).all()
-def get_sales_summary(db: Session):
-    total_orders = db.query(models.Order).count()
-    total_revenue = db.query(func.sum(models.Order.total)).scalar() or 0.0
     
-    return {
-        "total_orders": total_orders,
-        "total_revenue": total_revenue
-    }
+    
+def list_orders(date: str | None = None) -> list[dict]:
+    with get_session() as s:
+        query = select(Order).order_by(Order.id)
+        if date is not None:
+            query = query.where(Order.date == date)
+        return [o.to_dict() for o in s.scalars(query)]
+    
 
-def create_product_dict(db: Session, product_data: dict):
-    db_product = models.Product(
-        name=product_data.get("name"),
-        category=product_data.get("category"),
-        price=product_data.get("price"),
-        stock=product_data.get("stock")
-    )
-    db.add(db_product)
-    db.commit()
-    db.refresh(db_product)
-    return db_product
+def get_order_items(order_id: int) -> list[dict] | None:
+    with get_session() as s:
+        if s.get(Order, order_id) is None:
+            return None
+        items = s.scalars(select(OrderItem).where(OrderItem.order_id == order_id))
+        return [{**i.to_dict(), "product_name": i.product.name} for i in items]
+    
+    
+def get_sales_summary() -> dict:
+    with get_session() as s:
+        total_orders = s.scalar(select(func.count(Order.id)))
+        total_revenue = s.scalar(select(func.sum(Order.total))) or 0.0
+        units = func.sum(OrderItem.quantity).label("units_sold")
+        rows = s.execute(
+            select(Product.id, Product.name, units)
+            .join(OrderItem, OrderItem.product_id == Product.id)
+            .group_by(Product.id)
+            .order_by(units.desc())
+            .limit(5)
+        ).all()
+        best_sellers = [
+            {"product_id": r.id, "name": r.name, "units_sold": r.units_sold}
+            for r in rows
+        ]
+        return {
+            "total_orders": total_orders,
+            "total_revenue": total_revenue,
+            "best_sellers": best_sellers,
+        }
+        
+
+def create_product(data: dict) -> dict:
+    clean = validate_product(data)
+    with get_session() as s:
+        product = Product(**clean)
+        s.add(product)
+        s.commit()
+        return product.to_dict()
+    
+           
