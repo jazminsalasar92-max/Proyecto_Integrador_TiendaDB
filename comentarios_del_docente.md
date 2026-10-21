@@ -272,3 +272,64 @@ Háganlo ahora, que todavía no hay endpoints escritos: después es el doble de 
 **Más chico:** el título de la app dice "Pokedex Api"; quedan mensajes en español ("No encontrado", "¡Hola, Mundo!"); la tabla se llama `order_Items` (con mayúscula); la carpeta `.vscode/` no va en el repo. Los commits de Kiara se llaman todos "upload changes" o "actualice el proyecto": tienen que decir qué cambió.
 
 Antes de cada commit, levanten la API y prueben en `/docs`.
+
+## 21/10 (entrega)
+
+**Lo que hay:** Jazmín reescribió `crud.py` y agregó `validation.py`. 👍 Probé las funciones directamente y la parte de datos quedó bien:
+- `list_products` filtra por categoría.
+- `get_product` devuelve `None` si no existe.
+- `list_orders` tiene el filtro de fecha opcional.
+- `get_order_items` trae los items con el nombre del producto.
+- `get_sales_summary` devuelve el total (566.000) **y los más vendidos**, con los números correctos.
+- `validate_product` rechaza cuerpo vacío, precio negativo, `true` o texto, y stock negativo.
+
+**⚠️ Pero la API sigue sin arrancar, porque `main.py` no cambió desde el 15/10.** Primero falla por `depencies=` (línea 7). Corregido eso, falla porque los endpoints de pedidos, resumen y alta usan `Session`, `database.get_db` y `status`, que no existen. Además llaman a funciones con nombres viejos (`get_orders_by_date`, `create_product_dict`) o con un parámetro `db` que las funciones nuevas ya no reciben.
+
+**Lo que falta: reescribir `main.py` para que use el `crud.py` nuevo.** Cada endpoint llama a una función de `crud.py` y nada más. Esto está probado con su `crud.py` y su `security.py`:
+
+```python
+from fastapi import FastAPI, Depends, HTTPException
+from sqlalchemy.exc import OperationalError
+
+import crud
+from security import verify_api_Key
+
+app = FastAPI(title="TiendaDB API", dependencies=[Depends(verify_api_Key)])
+
+
+@app.get("/orders")
+def list_orders(date: str | None = None):
+    try:
+        return crud.list_orders(date)
+    except OperationalError:
+        raise HTTPException(status_code=500, detail="Database error")
+
+
+@app.get("/orders/{order_id}/items")
+def get_order_items(order_id: int):
+    try:
+        items = crud.get_order_items(order_id)
+    except OperationalError:
+        raise HTTPException(status_code=500, detail="Database error")
+    if items is None:
+        raise HTTPException(status_code=404, detail="Order not found")
+    return items
+
+
+@app.post("/products", status_code=201)
+def create_product(data: dict):
+    try:
+        return crud.create_product(data)
+    except ValueError as e:
+        raise HTTPException(status_code=400, detail=str(e))
+    except OperationalError:
+        raise HTTPException(status_code=500, detail="Database error")
+```
+
+Con eso: 401 sin clave, filtro de fecha opcional, 404 en un pedido que no existe, 201 en un alta válida y 400 con un mensaje claro si los datos están mal. Agreguen igual `GET /products`, `GET /products/{id}` (con 404) y `GET /sales/summary`, y **borren** la segunda verificación de clave (header `api-key`) y la función `get_sales_summary` suelta que quedó en `main.py`.
+
+**También falta el README:** cómo correrlo, los endpoints, la clave y la declaración de uso de IA. Hay una plantilla en [guias/como_escribir_un_readme.md](guias/como_escribir_un_readme.md).
+
+**Commits.** Desde el 15/10 solo hay commits de Jazmín. Si trabajan juntas, aclárenlo en el mensaje (*pair coding*). La nota es grupal y en la defensa les vamos a preguntar a las dos.
+
+**Para la defensa (28/10):** con `main.py` reescrito y el README tienen el Nivel A. Prueben la demo completa en la notebook con la que van a presentar.
