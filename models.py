@@ -4,7 +4,8 @@ import os
 
 from dotenv import load_dotenv
 load_dotenv()  # reads the .env file
-DB_FILE =os.getenv("DB_FILE" "tienda.db")
+DB_FILE =os.getenv("DB_FILE", "tienda.db")
+
 
 
 engine = create_engine(f"sqlite:///{DB_FILE}")
