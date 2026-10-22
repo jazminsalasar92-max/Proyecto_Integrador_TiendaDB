@@ -347,3 +347,24 @@ Probé con esos dos cambios y **funcionan los 6 endpoints**:
 - 401 sin clave.
 
 Con esas dos palabras corregidas tienen el Nivel A. **Falta además el README**, que se evalúa en la defensa.
+
+## 22/10
+
+**Lo que hay: la API arranca y los 6 endpoints funcionan.** 🎉 Corrigieron las dos palabras de `main.py`, y Kiara pasó la clave y el nombre de la base al `.env`, con `.env.example`. Lo probé:
+
+| # | Endpoint | Resultado |
+|---|---|---|
+| 1 | `GET /products?category=` | ✅ `calzado` trae 2 |
+| 2 | `GET /products/{id}` | ✅ `/999` da 404 |
+| 3 | `GET /orders/{id}/items` | ✅ Con el nombre del producto; pedido inexistente da 404 |
+| 4 | `GET /orders?date=` | ✅ Con y sin fecha |
+| 5 | `GET /sales/summary` | ✅ 566.000 facturado y los más vendidos, con los números correctos |
+| 6 | `POST /products` | ✅ 201 con datos válidos; 400 con precio negativo, `true` o cuerpo vacío |
+
+Además: sin clave o con clave mala da 401, el seed no duplica, y si falta la base casi todos los endpoints responden un error controlado.
+
+**⚠️ Lo único que falta: el README.** Es parte de lo que se evalúa en la defensa: cómo correr el proyecto desde cero (incluido copiar `.env.example` a `.env` y poner la clave), los 6 endpoints, cómo usar la clave en `/docs` y la declaración de uso de IA. Hay una plantilla en [guias/como_escribir_un_readme.md](guias/como_escribir_un_readme.md).
+
+**Recomendaciones**
+- `GET /products/{id}` es el único sin `try/except`: sin base da 500 sin control.
+- En `security.py`, `os.getenv("API_KEY", "MESSI")` usa `MESSI` si no hay `.env`, así que la clave queda igual escrita en el código. Si la sacan del código, saquen también ese valor por defecto.
