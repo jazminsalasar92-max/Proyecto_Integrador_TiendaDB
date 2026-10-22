@@ -4,7 +4,7 @@ from sqlalchemy.exc import IntegrityError, OperationalError
 import crud
 from security import verify_api_key
 
-app = FastAPI(title="tienda.db", depencies=
+app = FastAPI(title="tienda.db", dependencies=
 [Depends(verify_api_key)])
 
 @app.get("/")                
