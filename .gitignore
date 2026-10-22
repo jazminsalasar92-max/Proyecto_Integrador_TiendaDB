@@ -1,3 +1,4 @@
 __pycache__/
 tienda.db
 .env
+.vscode/
