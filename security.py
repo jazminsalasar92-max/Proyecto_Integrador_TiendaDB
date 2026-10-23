@@ -3,11 +3,11 @@ from dotenv import load_dotenv
 from fastapi import Depends, HTTPException
 from fastapi.security import APIKeyHeader
 
-load_dotenv()  # Lee el archivo .env
+load_dotenv()
 
-API_KEY = os.getenv("API_KEY", "MESSI")
+API_KEY = os.getenv("API_KEY")
 if API_KEY is None:
-    raise RuntimeError("verify_api_key")
+    raise RuntimeError("Missing API_KEY variable")
 
 header = APIKeyHeader(name="X-API-Key")
 

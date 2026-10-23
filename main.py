@@ -20,11 +20,14 @@ def list_products(category: str | None = None):
     
 @app.get("/products/{product_id}")
 def get_product(product_id:int):
-    product = crud.get_product(product_id)
-    if product is None:
-           raise HTTPException(status_code=404,
-           detail="Product not found")
+    try:
+            product = crud.get_product(product_id)
+    except OperationalError:
+            raise HTTPException(status_code=500, detail="Database error")
+    if ptoduct is None:
+            raise HTTPException(status_code=404, detail="Product not found")
     return product
+    
 
 @app.get("/orders/{order_id}/items")
 def get_order_items(order_id: int):
