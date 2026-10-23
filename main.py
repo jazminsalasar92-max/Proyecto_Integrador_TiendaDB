@@ -24,7 +24,7 @@ def get_product(product_id:int):
             product = crud.get_product(product_id)
     except OperationalError:
             raise HTTPException(status_code=500, detail="Database error")
-    if ptoduct is None:
+    if product is None:
             raise HTTPException(status_code=404, detail="Product not found")
     return product
     
